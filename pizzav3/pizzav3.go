@@ -47,8 +47,8 @@ func requester(p string, work chan<- Request, done chan string) {
 
 func DoWork(ch chan Request) {
 	for {
-		pizza := <- ch
-		pizza.ch <- pizza.fn(pizza.pizza)
+		req := <- ch
+		req.ch <- req.fn(req.pizza)
 	}
 }
 
@@ -66,7 +66,12 @@ func MakePizza(numP int, numW int) {
 
 	// Assign a load of workers to the channel
 	for i:=0; i<numW; i++ {
-		go DoWork(ch)
+		go func() {
+			for {
+				req := <- ch
+				req.ch <- req.fn(req.pizza)
+			}
+		}()
 	}
 
 	for i := 0; i<numP; i++ {
